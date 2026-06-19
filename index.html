@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PredikBot — Prediksi Piala Dunia 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--wa-green:#1faa59;--wa-dark:#0d8a44;--wa-bg:#e8ebe3;--bubble-bot:#fff;--bubble-user:#d8f8df;--text:#1c1e21;--text-muted:#667781;--header-dark:#1a2b21}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#0b0f0c}
+.phone{max-width:480px;margin:0 auto;height:100vh;display:flex;flex-direction:column;background:var(--wa-bg);position:relative;overflow:hidden}
+.chat-header{background:var(--header-dark);color:#fff;padding:.85rem 1rem;display:flex;align-items:center;gap:10px;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.15);z-index:5}
+.bot-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--wa-green),var(--wa-dark));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.bot-info{flex:1;overflow:hidden}
+.bot-name{font-size:14.5px;font-weight:700;white-space:nowrap}
+.bot-status{font-size:11.5px;color:#9fd8b5;display:flex;align-items:center;gap:4px}
+.bot-status::before{content:'';width:6px;height:6px;border-radius:50%;background:#3ddc6f}
+.header-icon{font-size:18px;opacity:.85;cursor:pointer}
+
+.chat-body{flex:1;overflow-y:auto;padding:1rem .75rem;display:flex;flex-direction:column;gap:6px;background-image:radial-gradient(circle at 20% 30%,rgba(0,0,0,.02) 1px,transparent 1px);background-size:18px 18px}
+.chat-body::-webkit-scrollbar{width:4px}
+.chat-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:99px}
+
+.msg-row{display:flex;max-width:88%}
+.msg-row.bot{align-self:flex-start}
+.msg-row.user{align-self:flex-end}
+.bubble{padding:.6rem .8rem;border-radius:10px;font-size:13.5px;line-height:1.55;position:relative;box-shadow:0 1px 1px rgba(0,0,0,.05)}
+.bot .bubble{background:var(--bubble-bot);border-top-left-radius:3px;color:var(--text)}
+.user .bubble{background:var(--bubble-user);border-top-right-radius:3px;color:var(--text)}
+.bubble .msg-time{display:block;font-size:10px;color:#8c9a92;text-align:right;margin-top:4px}
+.bubble pre{font-family:'Inter',monospace;font-size:12.8px;white-space:pre-wrap;line-height:1.65;margin:0}
+.match-block{margin-bottom:.85rem;padding-bottom:.7rem;border-bottom:1px dashed #dfe5de}
+.match-block:last-child{margin-bottom:0;border-bottom:none;padding-bottom:0}
+.match-title{font-weight:800;font-size:13.5px;margin-bottom:4px;color:#0d3b1f}
+.match-line{display:flex;justify-content:space-between;gap:6px;font-size:12.8px;padding:1px 0}
+.ml-key{color:var(--text-muted);font-weight:600}
+.ml-val{font-weight:700}
+.val-over{color:#0d8a44}
+.val-under{color:#c02b2f}
+.val-yes{color:#0d8a44}
+.val-no{color:#c02b2f}
+.val-m{color:#1f6fdb}
+.daily-header{font-weight:800;font-size:13.5px;color:#0d3b1f;margin-bottom:.6rem;display:flex;align-items:center;gap:6px}
+.daily-footer{font-size:11px;color:#8c9a92;margin-top:.5rem;padding-top:.5rem;border-top:1px solid #eef1ec}
+
+.typing-bubble{background:var(--bubble-bot);border-radius:10px;border-top-left-radius:3px;padding:.7rem 1rem;display:flex;gap:4px;align-items:center;width:fit-content}
+.typing-dot{width:6px;height:6px;border-radius:50%;background:#9aa39a;animation:tdot 1.2s infinite ease-in-out}
+.typing-dot:nth-child(2){animation-delay:.2s}
+.typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-4px);opacity:1}}
+
+.quick-row{padding:.5rem .75rem;display:flex;gap:6px;overflow-x:auto;flex-shrink:0;background:var(--wa-bg)}
+.quick-row::-webkit-scrollbar{display:none}
+.quick-chip{flex-shrink:0;background:#fff;border:1px solid #d8ddd4;color:#0d3b1f;font-size:12px;font-weight:600;padding:7px 13px;border-radius:99px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.quick-chip:active{background:var(--wa-green);color:#fff;border-color:var(--wa-green)}
+
+.input-bar{background:#fff;padding:.6rem .65rem;display:flex;gap:8px;align-items:center;flex-shrink:0;border-top:1px solid #e2e5e0}
+.input-bar input{flex:1;background:var(--wa-bg);border:none;border-radius:22px;padding:11px 16px;font-size:13.5px;outline:none;font-family:'Inter',sans-serif}
+.send-btn{width:42px;height:42px;border-radius:50%;background:var(--wa-green);border:none;color:#fff;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .1s}
+.send-btn:active{transform:scale(.92)}
+
+.wm{text-align:center;font-size:10.5px;color:#9aa39a;padding:.4rem 0 0}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="chat-header">
+    <div class="bot-avatar">⚽</div>
+    <div class="bot-info">
+      <div class="bot-name">PredikBot — Piala Dunia 2026</div>
+      <div class="bot-status">online · prediksi otomatis</div>
+    </div>
+    <div class="header-icon" onclick="clearChat()">🗑️</div>
+  </div>
+
+  <div class="chat-body" id="chatBody"></div>
+
+  <div class="quick-row">
+    <div class="quick-chip" onclick="sendQuick('predik hari ni')">🔮 predik hari ni</div>
+    <div class="quick-chip" onclick="sendQuick('jadwal')">📅 jadwal</div>
+    <div class="quick-chip" onclick="sendQuick('bantuan')">❓ bantuan</div>
+  </div>
+
+  <div class="input-bar">
+    <input type="text" id="chatInput" placeholder="Ketik 'predik hari ni'..." onkeydown="if(event.key==='Enter')handleSend()">
+    <button class="send-btn" onclick="handleSend()">➤</button>
+  </div>
+  <div class="wm">⚠️ Prediksi statistik, bukan jaminan hasil. Main bijak.</div>
+</div>
+
+<script>
+// ═══ 48 TIM PIALA DUNIA 2026 ═══
+const TEAMS={
+CAN:{flag:'🇨🇦',name:'Canada',conf:'CONCACAF',att:73,def:72,form:72},
+MEX:{flag:'🇲🇽',name:'Mexico',conf:'CONCACAF',att:75,def:73,form:74},
+USA:{flag:'🇺🇸',name:'United States',conf:'CONCACAF',att:76,def:74,form:75},
+PAN:{flag:'🇵🇦',name:'Panama',conf:'CONCACAF',att:61,def:63,form:60},
+HAI:{flag:'🇭🇹',name:'Haiti',conf:'CONCACAF',att:56,def:57,form:53},
+CUW:{flag:'🇨🇼',name:'Curaçao',conf:'CONCACAF',att:53,def:54,form:50},
+ARG:{flag:'🇦🇷',name:'Argentina',conf:'CONMEBOL',att:92,def:87,form:92},
+BRA:{flag:'🇧🇷',name:'Brazil',conf:'CONMEBOL',att:89,def:87,form:88},
+URU:{flag:'🇺🇾',name:'Uruguay',conf:'CONMEBOL',att:77,def:81,form:76},
+PAR:{flag:'🇵🇾',name:'Paraguay',conf:'CONMEBOL',att:65,def:67,form:62},
+COL:{flag:'🇨🇴',name:'Colombia',conf:'CONMEBOL',att:78,def:75,form:76},
+ECU:{flag:'🇪🇨',name:'Ecuador',conf:'CONMEBOL',att:71,def:71,form:69},
+ENG:{flag:'🏴',name:'England',conf:'UEFA',att:87,def:85,form:87},
+FRA:{flag:'🇫🇷',name:'France',conf:'UEFA',att:91,def:90,form:89},
+ESP:{flag:'🇪🇸',name:'Spain',conf:'UEFA',att:89,def:87,form:90},
+GER:{flag:'🇩🇪',name:'Germany',conf:'UEFA',att:85,def:84,form:84},
+POR:{flag:'🇵🇹',name:'Portugal',conf:'UEFA',att:89,def:81,form:85},
+NED:{flag:'🇳🇱',name:'Netherlands',conf:'UEFA',att:84,def:81,form:83},
+BEL:{flag:'🇧🇪',name:'Belgium',conf:'UEFA',att:82,def:79,form:80},
+CRO:{flag:'🇭🇷',name:'Croatia',conf:'UEFA',att:79,def:81,form:78},
+SUI:{flag:'🇨🇭',name:'Switzerland',conf:'UEFA',att:77,def:79,form:77},
+AUT:{flag:'🇦🇹',name:'Austria',conf:'UEFA',att:77,def:76,form:75},
+NOR:{flag:'🇳🇴',name:'Norway',conf:'UEFA',att:82,def:74,form:76},
+SCO:{flag:'🏴',name:'Scotland',conf:'UEFA',att:71,def:72,form:70},
+SWE:{flag:'🇸🇪',name:'Sweden',conf:'UEFA',att:75,def:74,form:73},
+TUR:{flag:'🇹🇷',name:'Türkiye',conf:'UEFA',att:76,def:74,form:72},
+CZE:{flag:'🇨🇿',name:'Czechia',conf:'UEFA',att:73,def:73,form:70},
+BIH:{flag:'🇧🇦',name:'Bosnia & Herzegovina',conf:'UEFA',att:71,def:69,form:67},
+JAP:{flag:'🇯🇵',name:'Japan',conf:'AFC',att:79,def:79,form:78},
+KOR:{flag:'🇰🇷',name:'South Korea',conf:'AFC',att:73,def:73,form:71},
+AUS:{flag:'🇦🇺',name:'Australia',conf:'AFC',att:69,def:69,form:67},
+IRN:{flag:'🇮🇷',name:'Iran',conf:'AFC',att:70,def:73,form:68},
+SAU:{flag:'🇸🇦',name:'Saudi Arabia',conf:'AFC',att:67,def:69,form:65},
+QAT:{flag:'🇶🇦',name:'Qatar',conf:'AFC',att:62,def:64,form:60},
+UZB:{flag:'🇺🇿',name:'Uzbekistan',conf:'AFC',att:64,def:64,form:61},
+JOR:{flag:'🇯🇴',name:'Jordan',conf:'AFC',att:61,def:62,form:58},
+IRQ:{flag:'🇮🇶',name:'Iraq',conf:'AFC',att:62,def:62,form:59},
+MAR:{flag:'🇲🇦',name:'Morocco',conf:'CAF',att:79,def:84,form:80},
+EGY:{flag:'🇪🇬',name:'Egypt',conf:'CAF',att:72,def:70,form:69},
+ALG:{flag:'🇩🇿',name:'Algeria',conf:'CAF',att:70,def:70,form:67},
+TUN:{flag:'🇹🇳',name:'Tunisia',conf:'CAF',att:68,def:69,form:65},
+SEN:{flag:'🇸🇳',name:'Senegal',conf:'CAF',att:77,def:76,form:75},
+GHA:{flag:'🇬🇭',name:'Ghana',conf:'CAF',att:67,def:66,form:64},
+RSA:{flag:'🇿🇦',name:'South Africa',conf:'CAF',att:64,def:66,form:62},
+CIV:{flag:'🇨🇮',name:"Côte d'Ivoire",conf:'CAF',att:73,def:70,form:70},
+CPV:{flag:'🇨🇻',name:'Cape Verde',conf:'CAF',att:63,def:64,form:60},
+COD:{flag:'🇨🇩',name:'DR Congo',conf:'CAF',att:64,def:64,form:61},
+NZL:{flag:'🇳🇿',name:'New Zealand',conf:'OFC',att:58,def:60,form:56}
+};
+const KEYS=Object.keys(TEAMS);
+
+// ═══ SEEDED RANDOM (jadwal konsisten per hari) ═══
+function strHash(s){let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0}return h}
+function mulberry32(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function todaySeedRng(){const d=new Date();const key=d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();return mulberry32(strHash(key))}
+
+function shuffleSeeded(arr,rng){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+  return a;
+}
+
+function dailyFixtures(n=5){
+  const rng=todaySeedRng();
+  const shuffled=shuffleSeeded(KEYS,rng);
+  const picks=shuffled.slice(0,n*2);
+  const fixtures=[];
+  for(let i=0;i<picks.length-1;i+=2) fixtures.push([picks[i],picks[i+1]]);
+  return fixtures;
+}
+
+// ═══ MATH ENGINE ═══
+function poisson(l,k){let p=Math.exp(-l);for(let i=0;i<k;i++)p*=l/(i+1);return Math.max(0,p)}
+function getXG(ka,kb){
+  const a=TEAMS[ka],b=TEAMS[kb];
+  const gA=Math.max(.15,.85+(a.att/100)*1.95-(b.def/100)*1.15+(a.form-b.form)*.006);
+  const gB=Math.max(.15,.85+(b.att/100)*1.95-(a.def/100)*1.15+(b.form-a.form)*.006);
+  return{gA,gB};
+}
+function get1X2(ka,kb){
+  const{gA,gB}=getXG(ka,kb);let wA=0,dr=0,wB=0;
+  for(let i=0;i<=9;i++)for(let j=0;j<=9;j++){const p=poisson(gA,i)*poisson(gB,j);if(i>j)wA+=p;else if(i===j)dr+=p;else wB+=p}
+  const t=wA+dr+wB;
+  return{wA:(wA/t)*100,draw:(dr/t)*100,wB:(wB/t)*100};
+}
+function getOU(ka,kb,line){
+  const{gA,gB}=getXG(ka,kb);let ov=0;
+  for(let i=0;i<=10;i++)for(let j=0;j<=10;j++)if(i+j>line)ov+=poisson(gA,i)*poisson(gB,j);
+  ov=Math.min(.95,Math.max(.05,ov));
+  return{over:ov*100,under:(1-ov)*100};
+}
+function getBTTS(ka,kb){
+  const{gA,gB}=getXG(ka,kb);
+  const y=(1-poisson(gA,0))*(1-poisson(gB,0))*100;
+  return{yes:y,no:100-y};
+}
+function getCorner(ka,kb){
+  const a=TEAMS[ka],b=TEAMS[kb];
+  const exp = 7.5 + ((a.att+b.att)-140)/14;
+  return Math.max(6.5,Math.min(13,exp));
+}
+
+// ═══ BUILD PREDICTION BLOCK (format sesuai contoh) ═══
+function buildMatchBlock(ka,kb){
+  const a=TEAMS[ka],b=TEAMS[kb];
+  const p=get1X2(ka,kb);
+  const ou15=getOU(ka,kb,1.5);
+  const ou25=getOU(ka,kb,2.5);
+  const bt=getBTTS(ka,kb);
+  const cornerExp=getCorner(ka,kb);
+
+  // 1X2
+  let mainCode,dcCode;
+  if(p.wA>=p.wB && p.wA>=p.draw){ mainCode='M1'; dcCode='X1'; }
+  else if(p.wB>p.wA && p.wB>p.draw){ mainCode='M2'; dcCode='X2'; }
+  else { mainCode='X'; dcCode='12'; }
+
+  const ou15txt = ou15.over>=ou15.under ? 'Over' : 'Under';
+  const ou25txt = ou25.over>=ou25.under ? 'Over' : 'Under';
+  const bttsTxt = bt.yes>=bt.no ? 'Ya' : 'Tidak';
+
+  const cornerLine = cornerExp>=9 ? 10.5 : 9.5;
+  const cornerSide = cornerExp>=cornerLine ? 'Over' : 'Under';
+
+  return {
+    title:`${a.flag} ${a.name.toUpperCase()} VS ${b.name.toUpperCase()} ${b.flag}`,
+    rows:[
+      ['1X2', mainCode, 'val-m'],
+      ['DC', dcCode, 'val-m'],
+      ['OVER / UNDER = 1.5', ou15txt, ou15txt==='Over'?'val-over':'val-under'],
+      ['OVER / UNDER = 2.5', ou25txt, ou25txt==='Over'?'val-over':'val-under'],
+      ['BTTS', bttsTxt, bttsTxt==='Ya'?'val-yes':'val-no'],
+      ['CORNER', cornerLine+' '+cornerSide, cornerSide==='Over'?'val-over':'val-under'],
+    ]
+  };
+}
+
+// ═══ PREDIKSI HARI INI — DATA TETAP (manual) ═══
+const FIXED_PREDICTIONS=[
+  { ka:'TUR', kb:'PAR', main:'M1', dc:'X1', ou15:'Over',  ou25:'Over',  btts:'Ya' },
+  { ka:'BRA', kb:'HAI', main:'M1', dc:'X1', ou15:'Over',  ou25:'Under', btts:'Tidak' },
+  { ka:'SCO', kb:'MAR', main:'M1', dc:'X1', ou15:'Over',  ou25:'Over',  btts:'Ya' },
+  { ka:'USA', kb:'AUS', main:'M1', dc:'X1', ou15:'Over',  ou25:'Over',  btts:'Ya', corner:'10.5 Under' },
+];
+
+function buildFixedBlock(f){
+  const a=TEAMS[f.ka],b=TEAMS[f.kb];
+  const rows=[
+    ['1X2', f.main, 'val-m'],
+    ['DC', f.dc, 'val-m'],
+    ['OVER / UNDER = 1.5', f.ou15, f.ou15==='Over'?'val-over':'val-under'],
+    ['OVER / UNDER = 2.5', f.ou25, f.ou25==='Over'?'val-over':'val-under'],
+    ['BTTS', f.btts, f.btts==='Ya'?'val-yes':'val-no'],
+  ];
+  if(f.corner) rows.push(['CORNER', f.corner, f.corner.toLowerCase().includes('over')?'val-over':'val-under']);
+  return {
+    title:`${a.flag} ${a.name.toUpperCase()} VS ${b.name.toUpperCase()} ${b.flag}`,
+    rows
+  };
+}
+
+function renderDailyHTML(){
+  const d=new Date();
+  const tgl=d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+  let blocksHtml='';
+  FIXED_PREDICTIONS.forEach(f=>{
+    const m=buildFixedBlock(f);
+    blocksHtml+=`<div class="match-block">
+      <div class="match-title">${m.title}</div>
+      ${m.rows.map(r=>`<div class="match-line"><span class="ml-key">${r[0]} =</span><span class="ml-val ${r[2]}">${r[1]}</span></div>`).join('')}
+    </div>`;
+  });
+  return `<div class="daily-header">📅 PREDIKSI HARI INI — ${tgl}</div>${blocksHtml}<div class="daily-footer">⚠️ Statistik prediksi, bukan jaminan menang. Cek odds sebelum pasang.</div>`;
+}
+
+function renderSingleMatchHTML(ka,kb){
+  const m=buildMatchBlock(ka,kb);
+  return `<div class="match-block" style="border-bottom:none;padding-bottom:0;margin-bottom:0">
+    <div class="match-title">${m.title}</div>
+    ${m.rows.map(r=>`<div class="match-line"><span class="ml-key">${r[0]} =</span><span class="ml-val ${r[2]}">${r[1]}</span></div>`).join('')}
+  </div><div class="daily-footer">⚠️ Statistik otomatis, bukan jaminan menang.</div>`;
+}
+
+// ═══ CHAT ENGINE ═══
+const chatBody=document.getElementById('chatBody');
+function nowTime(){return new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}
+
+function addUserMsg(text){
+  const row=document.createElement('div');
+  row.className='msg-row user';
+  row.innerHTML=`<div class="bubble">${escapeHtml(text)}<span class="msg-time">${nowTime()}</span></div>`;
+  chatBody.appendChild(row);
+  scrollDown();
+}
+
+function addBotMsgHTML(html, withTime=true){
+  const row=document.createElement('div');
+  row.className='msg-row bot';
+  row.innerHTML=`<div class="bubble">${html}${withTime?`<span class="msg-time">${nowTime()}</span>`:''}</div>`;
+  chatBody.appendChild(row);
+  scrollDown();
+}
+
+function showTyping(cb,delay=900){
+  const row=document.createElement('div');
+  row.className='msg-row bot';
+  row.id='typingRow';
+  row.innerHTML=`<div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+  chatBody.appendChild(row);
+  scrollDown();
+  setTimeout(()=>{
+    const t=document.getElementById('typingRow');
+    if(t) t.remove();
+    cb();
+  },delay);
+}
+
+function scrollDown(){chatBody.scrollTop=chatBody.scrollHeight+200}
+function escapeHtml(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+function findTeamKey(text){
+  const q=text.toLowerCase().trim();
+  for(const k of KEYS){
+    if(TEAMS[k].name.toLowerCase()===q || k.toLowerCase()===q) return k;
+  }
+  for(const k of KEYS){
+    if(TEAMS[k].name.toLowerCase().includes(q) && q.length>=3) return k;
+  }
+  return null;
+}
+
+function handleSend(){
+  const input=document.getElementById('chatInput');
+  const text=input.value.trim();
+  if(!text) return;
+  addUserMsg(text);
+  input.value='';
+  processCommand(text);
+}
+
+function sendQuick(text){
+  addUserMsg(text);
+  processCommand(text);
+}
+
+function processCommand(text){
+  const t=text.toLowerCase();
+
+  if(t.includes('predik') || t.includes('jadwal')){
+    showTyping(()=>{ addBotMsgHTML(renderDailyHTML()); },1100);
+    return;
+  }
+
+  if(t.includes('bantuan') || t.includes('help') || t==='?'){
+    showTyping(()=>{
+      addBotMsgHTML(`👋 Halo! Saya <b>PredikBot</b> ⚽<br><br>
+      Cara pakai:<br>
+      🔮 Ketik <b>predik hari ni</b> → dapat 5 prediksi pertandingan hari ini otomatis<br>
+      ⚔️ Ketik <b>nama tim A vs nama tim B</b> → cek 1 pertandingan spesifik<br><br>
+      Contoh: <i>brazil vs argentina</i>`);
+    },800);
+    return;
+  }
+
+  // coba deteksi format "TIM A vs TIM B"
+  if(t.includes(' vs ') || t.includes(' v ') || t.includes(' lawan ')){
+    const sep = t.includes(' vs ') ? ' vs ' : t.includes(' lawan ') ? ' lawan ' : ' v ';
+    const parts=text.split(new RegExp(sep,'i'));
+    if(parts.length===2){
+      const ka=findTeamKey(parts[0]);
+      const kb=findTeamKey(parts[1]);
+      if(ka && kb && ka!==kb){
+        showTyping(()=>{ addBotMsgHTML(renderSingleMatchHTML(ka,kb)); },1000);
+        return;
+      } else {
+        showTyping(()=>{
+          addBotMsgHTML(`Maaf, tim tidak ditemukan 😅<br>Coba pakai nama lengkap, contoh: <i>france vs senegal</i><br><br>Atau ketik <b>predik hari ni</b> untuk lihat jadwal otomatis.`);
+        },800);
+        return;
+      }
+    }
+  }
+
+  showTyping(()=>{
+    addBotMsgHTML(`Maaf, saya tidak paham 🤔<br>Ketik <b>predik hari ni</b> untuk prediksi otomatis, atau ketik <b>bantuan</b>.`);
+  },700);
+}
+
+function clearChat(){
+  chatBody.innerHTML='';
+  initChat();
+}
+
+function initChat(){
+  addBotMsgHTML(`👋 Halo! Saya <b>PredikBot</b> ⚽<br><br>Ketik <b>predik hari ni</b> dan saya otomatis kirim prediksi pertandingan Piala Dunia 2026 hari ini — lengkap dengan 1X2, DC, Over/Under, BTTS, dan Corner!`);
+}
+
+initChat();
+</script>
+</body>
+</html>
